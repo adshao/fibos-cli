@@ -1,0 +1,18 @@
+#!/usr/bin/env fibos
+
+var program = require("commander");
+var FIBOS = require("fibos.js");
+
+program
+    .command("key")
+    .description("Create a new keypair and print the public and private keys")
+    .action(function(){
+        var prikey = FIBOS.modules.ecc.randomKey(function(prikey) {
+            var pubkey = FIBOS.modules.ecc.privateToPublic(prikey);
+            console.log({prikey: prikey, pubkey: pubkey});
+        });
+    });
+
+program.parse(process.argv);
+
+console.log(FIBOS.modules.ecc.randomKeySync());

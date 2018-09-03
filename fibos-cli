@@ -1,0 +1,15 @@
+#!/usr/bin/env fibos
+
+var program = require("commander");
+
+program
+    .version('0.1.0')
+    .option('-u, --url <url>', 'the http/https URL where nodeos is running: http://127.0.0.1:8888/')
+
+program
+    .command('create', 'Create various items, on and off the blockchain')
+    .command('get', 'Retrieve various items and information from the blockchain')
+    .command('transfer', 'Transfer FO from account to account')
+    .command('deposite', 'Deposite EOS from mainnet to FIBOS')
+    .command('withdraw', 'Withdraw EOS from FIBOS to mainnet')
+    .parse(process.argv);

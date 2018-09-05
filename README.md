@@ -60,6 +60,9 @@ export FIBOS_PRIKEY=xxx
 export FIBOS_EOS_PUBKEY=xxx
 export FIBOS_EOS_PRIKEY=xxx
 ```
+```shell
+source secure.key
+```
 
 ### Create Key Pair
 

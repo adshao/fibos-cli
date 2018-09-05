@@ -1,0 +1,40 @@
+#!/usr/bin/env fibos
+
+var program = require("commander");
+var utils = require("./utils");
+
+program
+    .command("* <fibos-account> <eos-account> <amount>", "Withdraw EOS from FIBOS to mainnet")
+    .action(function(fibosAccount, eosAccount, amount, options){
+        if (!amount.endsWith(" EOS")) {
+            console.error("amount should end with EOS");
+            process.exit(1)
+        }
+        var client = utils.newFibosClient();
+        var sender = fibosAccount;
+        var recipient = "fiboscouncil";
+        var memo = eosAccount;
+        var ctx = client.contractSync("eosio.token");
+        var res = ctx.transferSync(sender, recipient, amount, memo);
+        console.log(res);
+    })
+    .helpInfo(`
+  Usage: fibos-cli-withdraw [options] <fibos-account> <eos-account> <amount>
+
+  Withdraw EOS from FIBOS to mainnet
+
+  Arguments:
+
+    fibos-account          TEXT    Account name on FIBOS
+    eos-account            TEXT    Account name on EOS mainnet
+    amount                 TEXT    EOS Amount: 0.0001 EOS
+
+  Options:
+
+    -h, --help                               output usage information
+
+`);
+
+program.parse(process.argv);
+
+utils.checkArgs(program);

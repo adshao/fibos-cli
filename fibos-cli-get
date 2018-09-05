@@ -1,0 +1,54 @@
+#!/usr/bin/env fibos
+
+var program = require("commander");
+var utils = require("./utils");
+var http = require("http");
+
+program
+    .command("account <name>")
+    .description("Retrieve an account from the blockchain", {
+        "name": "TEXT    The name of the account to retrieve (required)"
+    })
+    .action(function(name){
+        var client = utils.newFibosClient();
+        console.log(client.getAccountSync(name))
+    });
+
+program
+    .command("table <contract> <scope> <table>")
+    .description("Retrieve the contents of a database table", {
+        "contract": "TEXT    The contract who owns the table (required)",
+        "scope": "TEXT    The scope within the contract in which the table is found (required)",
+        "table": "TEXT    The name of the table as specified by the contract abi (required)"
+    })
+    .action(function(contract, scope, table) {
+        var client = utils.newFibosClient();
+        console.log(client.getTableRowsSync(true, contract, scope, table));
+    });
+
+program
+    .command("ramprice")
+    .description("Retrieve ram price")
+    .action(function(){
+        var client = utils.newFibosClient();
+        var rs = client.getTableRowsSync(true, "eosio", "eosio", "rammarket");
+        var q = parseFloat(rs.rows[0].quote.balance.split(" ")[0]);
+        var b = parseFloat(rs.rows[0].base.balance.split(" ")[0]);
+        var price = q / b * 1024;
+        console.log("ram prices:", price, "FO/KB");
+    });
+
+program
+    .command("exchangeinfo")
+    .description("Retrieve fo price")
+    .option("--endpoint", "http endpoint: https://fibos.io/getExchangeInfo")
+    .action(function(options){
+        var endpoint = options.endpoint || "https://fibos.io/getExchangeInfo";
+        var httpClient = new http.Client();
+        var res = httpClient.post(endpoint).json();
+        console.log("fo price:", res.price, "FO/EOS");
+    });
+
+program.parse(process.argv);
+
+utils.checkArgs(program);

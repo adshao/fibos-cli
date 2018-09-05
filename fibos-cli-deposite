@@ -1,0 +1,47 @@
+#!/usr/bin/env fibos
+
+var program = require("commander");
+var utils = require("./utils");
+
+program
+    .command("* <eos-account> <fibos-account> <amount>", "Deposite EOS from mainnet to FIBOS")
+    .option("--eos-chain-id <eos-chain-id>", "chain id of EOS mainnet: aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906")
+    .option("--eos-endpoint <eos-endpoint>", "endpoint of EOS mainnet: http://api.eosbeijing.one")
+    .action(function(eosAccount, fibosAccount, amount, options){
+        if (!amount.endsWith(" EOS")) {
+            console.error("amount should end with EOS");
+            process.exit(1)
+        }
+        var client = utils.newEosClient({
+            chainId: options.eosChainId,
+            httpEndpoint: options.eosEndpoint,
+        });
+        var sender = eosAccount;
+        var recipient = "fiboscouncil";
+        var memo = fibosAccount;
+        var ctx = client.contractSync("eosio.token");
+        var res = ctx.transferSync(sender, recipient, amount, memo);
+        console.log(res);
+    })
+    .helpInfo(`
+  Usage: fibos-cli-deposite [options] <eos-account> <fibos-account> <amount>
+
+  Deposite EOS from mainnet to FIBOS
+
+  Arguments:
+
+    eos-account        TEXT    Account name on EOS mainnet
+    fibos-account      TEXT    Account name on FIBOS
+    amount             TEXT    EOS amount: 0.0001 EOS
+
+  Options:
+
+    --eos-chain-id     Chain id of EOS mainnet
+    --eos-endpoint     Endpoint of EOS mainnet
+    -h, --help         Output usage information
+
+`);
+
+program.parse(process.argv);
+
+utils.checkArgs(program);

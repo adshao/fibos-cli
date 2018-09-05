@@ -2,17 +2,39 @@
 
 var program = require("commander");
 var FIBOS = require("fibos.js");
+var http = require("http");
+var utils = require("./utils");
 
 program
     .command("key")
     .description("Create a new keypair and print the public and private keys")
     .action(function(){
-        var prikey = FIBOS.modules.ecc.randomKey(function(prikey) {
-            var pubkey = FIBOS.modules.ecc.privateToPublic(prikey);
-            console.log({prikey: prikey, pubkey: pubkey});
-        });
+        var prikey = FIBOS.modules.ecc.randomKeySync();
+        var pubkey = FIBOS.modules.ecc.privateToPublic(prikey);
+        console.log("Private key:", prikey);
+        console.log("Public key:", pubkey);
+    });
+
+program
+    .command("account <name> <owner-key>")
+    .description("Create an account, buy ram, stake for bandwidth for the account", {
+        "name": "TEXT    The name of the new account (required)",
+        "owner-key": "TEXT    The owner public key for the new account (required)"
+    })
+    .option("--host-server <url>", "fibos http server host: http://tunnel.fibos.io/1.0/app/token/create")
+    .action(function(name, ownerKey, options){
+        var httpClient = new http.Client();
+        var httpServerHost = options.hostServer || "http://tunnel.fibos.io/1.0/app/token/create";;
+        var pubkey = ownerKey;
+        var res = httpClient.post(httpServerHost, {
+            json: {
+                    account: name,
+                    pubkey: pubkey
+            }
+        }).json()
+        console.log(res);
     });
 
 program.parse(process.argv);
 
-console.log(FIBOS.modules.ecc.randomKeySync());
+utils.checkArgs(program);

@@ -1,0 +1,39 @@
+#!/usr/bin/env fibos
+
+var program = require("commander");
+var utils = require("./utils");
+
+program
+    .command("* <fibos-account> <from> <to> [memo]", "Exchange Tokens")
+    .action(function(fibosAccount, from, to, memo){
+        memo = typeof memo === "object" ? "exchange tokens" : memo;
+        var client = utils.newFibosClient();
+        let ctx = client.contractSync("eosio.token");
+        var res = ctx.exchangeSync(
+            fibosAccount,
+            from.indexOf("@") > -1 ? from : from + "@eosio",
+            to.indexOf("@") > -1 ? to : to + "@eosio",
+            memo,
+            { authorization: fibosAccount }
+        );
+        console.log(res);
+    })
+    .helpInfo(`
+  Usage: fibos-cli-exchange [options] <fibos-account> <from> <to> [memo]
+
+  Exchange Tokens
+
+    fibos-account    TEXT    Exchange account
+    from             TEXT    From symbol: 0.0001 EOS
+    to               TEXT    To symbol: 0.0000 FO
+    memo             TEXT    Memo
+
+  Options:
+
+    -h, --help       Output usage information
+
+`);
+
+program.parse(process.argv);
+
+utils.checkArgs(program);

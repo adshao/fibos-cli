@@ -4,7 +4,8 @@ var program = require("commander");
 
 program
     .version('0.1.0')
-    .option('-u, --url <url>', 'the http/https URL where nodeos is running: http://127.0.0.1:8888/')
+    .option('-u, --url <url>', 'The http/https URL where nodeos is running: http://se-rpc.fibos.io:8870')
+    .option('--chain-id <chain-id>', 'The chain id of fibos: 6aa7bd33b6b45192465afa3553dedb531acaaff8928cf64b70bd4c5e49b7ec6a')
 
 program
     .command('create', 'Create various items, on and off the blockchain')
@@ -12,4 +13,6 @@ program
     .command('transfer', 'Transfer FO from account to account')
     .command('deposite', 'Deposite EOS from mainnet to FIBOS')
     .command('withdraw', 'Withdraw EOS from FIBOS to mainnet')
+    .command('exchange', 'Exchange EOF with FO')
+    .command('system', 'Send eosio.system contract action to the blockchain.')
     .parse(process.argv);

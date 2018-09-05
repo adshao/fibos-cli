@@ -1,0 +1,38 @@
+#!/usr/bin/env fibos
+
+var program = require("commander");
+var utils = require("./utils");
+
+program
+    .command("* <sender> <recipient> <amount> [memo]", "Transfer FO from account to account")
+    .action(function(sender, recipient, amount, memo){
+        if (!amount.endsWith(" FO")) {
+            console.error("amount should end with FO");
+            process.exit(1)
+        }
+        var client = utils.newFibosClient();
+        var ctx = client.contractSync("eosio.token");
+        var res = ctx.transferSync(sender, recipient, amount, memo);
+        console.log(res);
+    })
+    .helpInfo(`
+  Usage: fibos-cli-transfer [options] <sender> <recipient> <amount> [memo]
+
+  Transfer FO from account to account
+
+  Arguments:
+
+    sender          TEXT    The account sending EOS (required)
+    recipient       TEXT    The account receiving EOS (required)
+    amount          TEXT    The amount of EOS to send (required)
+    memo            TEXT    The memo for the transfer
+
+  Options:
+
+    -h, --help                               output usage information
+
+`);
+
+program.parse(process.argv);
+
+utils.checkArgs(program);

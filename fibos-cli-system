@@ -1,0 +1,189 @@
+#!/usr/bin/env fibos
+
+var program = require("commander");
+var utils = require("./utils");
+
+program
+    .command("newaccount <creator> <name> <owner-key> [active-key]")
+    .description("Create an account, buy ram, stake for bandwidth for the account", {
+        "creator": "TEXT    The name of the account creating the new account (required)",
+        "name": "TEXT    The name of the new account (required)",
+        "owner-key": "TEXT    The owner public key for the new account (required)",
+        "active-key": "TEXT    The active public key for the new account"
+    })
+    .option("--stake-net <TEXT>", "The amount of FO delegated for net bandwidth (required)")
+    .option("--stake-cpu <TEXT>", "The amount of FO delegated for CPU bandwidth (required)")
+    .option("--buy-ram-kbytes <UINT>", "The amount of RAM bytes to purchase for the new account in kibibytes (KiB), default is 8 KiB", "8")
+    .option("--transfer", "Transfer voting power and right to unstake FO to receiver")
+    .action(function(creator, name, ownerKey, activeKey, options) {
+        var client = utils.newFibosClient();
+        var res = client.transactionSync(tr => {
+            tr.newaccount({
+                creator: creator,
+                name: name,
+                owner: ownerKey,
+                active: activeKey || ownerKey
+            });
+
+            tr.buyrambytes({
+                payer: creator,
+                receiver: name,
+                bytes: parseInt(options.buyRamKbytes) * 1024
+            });
+
+            tr.delegatebw({
+                from: creator,
+                receiver: name,
+                stake_net_quantity: options.stakeNet,
+                stake_cpu_quantity: options.stakeCpu,
+                transfer: options.transfer ? 1 : 0
+            });
+        });
+        console.log(res);
+    });
+
+program
+    .command("listproducers")
+    .description("List producers")
+    .action(function(){
+        var client = utils.newFibosClient();
+        var res = client.getProducersSync({json: true});
+        console.log(res);
+    });
+
+program
+    .command("delegatebw <from> <receiver> <stake_net_quantity> <stake_cpu_quantity>")
+    .description("Delegate bandwidth", {
+        "from": "TEXT    The account to delegate bandwidth from (required)",
+        "receiver": "TEXT    The account to receive the delegated bandwidth (required)",
+        "stake_net_quantity": "TEXT    The amount of FO to stake for network bandwidth (required)",
+        "stake_cpu_quantity": "TEXT    The amount of FO to stake for CPU bandwidth (required)`)"
+    })
+    .option("--transfer", "Transfer voting power and right to unstake FO to receiver")
+    .action(function(from, receiver, stakeNetQuantity, stakeCpuQuantity, options){
+        var client = utils.newFibosClient();
+        var res = client.delegatebwSync({
+            from: from, 
+            receiver: receiver,
+            stake_net_quantity: stakeNetQuantity,
+            stake_cpu_quantity: stakeCpuQuantity,
+            transfer: options.transfer ? 1 : 0
+        });
+        console.log(res);
+    });
+
+program
+    .command("undelegatebw <from> <receiver> <unstake_net_quantity> <unstake_cpu_quantity>")
+    .description("Undelegate bandwidth", {
+        "from": "TEXT    The account undelegating bandwidth (required)",
+        "receiver": "TEXT    The account to undelegate bandwidth from (required)",
+        "unstake_net_quantity": "TEXT    The amount of FO to undelegate for network bandwidth (required)",
+        "unstake_cpu_quantity": "TEXT    The amount of FO to undelegate for CPU bandwidth (required)`)"
+    })
+    .action(function(from, receiver, unstakeNetQuantity, unstakeCpuQuantity){
+        var client = utils.newFibosClient();
+        var res = client.undelegatebwSync({
+            from: from,
+            receiver: receiver,
+            unstake_net_quantity: unstakeNetQuantity,
+            unstake_cpu_quantity: unstakeCpuQuantity
+        });
+        console.log(res);
+    });
+
+program
+    .command("buyram <payer> <receiver> <amount>")
+    .description("Buy RAM", {
+        "payer": "TEXT    The account paying for RAM (required)",
+        "receiver": "TEXT    The account receiving bought RAM (required)",
+        "amount": "TEXT    The amount of FO to pay for RAM, or number of kbytes of RAM if --kbytes is set (required)"
+    })
+    .option("-k,--kbytes <UINT>", "buyram in number of kbytes")
+    .action(function(payer, receiver, amount, options){
+        var client = utils.newFibosClient();
+        if (options.kbytes) {
+            amount = parseInt(amount) * 1024
+        }
+        var res = client.buyramSync(payer, receiver, amount);
+        console.log(res);
+    });
+
+program
+    .command("sellram <account> <bytes>")
+    .description("Sell RAM")
+    .action(function(account, bytes) {
+        var client = utils.newFibosClient();
+        var res = client.sellramSync(account, bytes);
+        console.log(res);
+    });
+
+program
+    .command("regproducer <account> <producer-key> <url> [location]")
+    .description("Register a new producer", {
+        "account": "TEXT      The account to register as a producer (required)",
+        "producer-key": "TEXT      The producer's public key (required)",
+        "url": "TEXT      url where info about producer can be found",
+        "location": "UINT=0    relative location for purpose of nearest neighbor scheduling"
+    })
+    .action(function(account, producerKey, url, location) {
+        location = location || 0;
+        var client = utils.newFibosClient();
+        var ctx = client.contractSync("eosio");
+        var res = ctx.regproducerSync(account, producerKey, url, location);
+        console.log(res);
+    });
+
+program
+    .command("unregprod <account>")
+    .description("Unregister an existing producer", {
+        "account": "TEXT    The account to unregister as a producer (required)"
+    })
+    .action(function(account){
+        var client = utils.newFibosClient();
+        var ctx = client.contractSync("eosio");
+        var res = ctx.unregprodSync(account);
+        console.log(res);
+    });
+
+program
+    .command("voteproducer <voter> [producers...]")
+    .description("Vote for one or more producers", {
+        "voter": "TEXT    The voting account (required)",
+        "producers": "TEXT    The account(s) to vote for. All options from this position and following will be treated as the producer list. (required)"
+    })
+    .option("--proxy <TEXT>", "The proxy account")
+    .action(function(voter, producers, options) {
+        var client = utils.newFibosClient();
+        var ctx = client.contractSync("eosio");
+        var res = ctx.voteproducerSync(voter, options.proxy || "", producers);
+        console.log(res);
+    });
+
+program
+    .command("rmvproducer <producer>")
+    .description("Remove voting from one producer", {
+        "producer": "TEXT    The account to remove voting from"
+    })
+    .option("-p,--permission <permission>", "An account and permission level to authorize, as in 'account@permission'")
+    .action(function(producer, options){
+        var client = utils.newFibosClient();
+        var ctx = client.contractSync("eosio");
+        var res = ctx.rmvproducerSync(producer, { authorization: options.permission });
+        console.log(res);
+    });
+
+program
+    .command("claimrewards <owner>")
+    .description("Claim producer rewards", {
+        "owner": "TEXT    The account to claim rewards for (required)"
+    })
+    .action(function(owner){
+        var client = utils.newFibosClient();
+        var ctx = client.contractSync("eosio");
+        var res = ctx.claimrewardsSync(owner);
+        console.log(res);
+    });
+
+program.parse(process.argv);
+
+utils.checkArgs(program);

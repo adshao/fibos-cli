@@ -44,7 +44,7 @@ $ fibos-cli
     transfer               Transfer FO from account to account
     deposite               Deposite EOS from mainnet to FIBOS
     withdraw               Withdraw EOS from FIBOS to mainnet
-    exchange               Exchange EOF with FO
+    exchange               Exchange EOS with FO
     system                 Send eosio.system contract action to the blockchain.
     help                   Display help for [cmd]
 ```

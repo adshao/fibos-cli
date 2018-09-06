@@ -179,8 +179,7 @@ program
     })
     .action(function(owner){
         var client = utils.newFibosClient();
-        var ctx = client.contractSync("eosio");
-        var res = ctx.claimrewardsSync(owner);
+        var res = client.claimrewardsSync(owner);
         console.log(res);
     });
 

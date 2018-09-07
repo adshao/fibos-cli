@@ -184,6 +184,30 @@ program
         console.log(res);
     });
 
+program
+    .command("regproxy <proxy>")
+    .description("Register an account as a proxy (for voting)", {
+        "proxy": "TEXT    The proxy account to register (required)"
+    })
+    .action(function(proxy){
+        var client = utils.newFibosClient();
+        var ctx = client.contractSync("eosio");
+        var res = ctx.regproxySync(proxy, 1)
+        console.log(res);
+    })
+
+program
+    .command("unregproxy <proxy>")
+    .description("Unregister an account as a proxy (for voting)", {
+        "proxy": "TEXT    The proxy account to unregister (required)"
+    })
+    .action(function(proxy){
+        var client = utils.newFibosClient();
+        var ctx = client.contractSync("eosio");
+        var res = ctx.regproxySync(proxy, 0)
+        console.log(res);
+    })
+
 program.parse(process.argv);
 
 utils.checkArgs(program);

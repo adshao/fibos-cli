@@ -11,8 +11,8 @@ program
     .action(function(){
         var prikey = FIBOS.modules.ecc.randomKeySync();
         var pubkey = FIBOS.modules.ecc.privateToPublic(prikey);
-        console.log("Private key:", prikey);
         console.log("Public key:", pubkey);
+        console.log("Private key:", prikey);
     });
 
 program

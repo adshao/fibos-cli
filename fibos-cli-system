@@ -45,9 +45,10 @@ program
 program
     .command("listproducers")
     .description("List producers")
-    .action(function(){
+    .option("-l,--limit <limit>", "The maximum number of rows to return")
+    .action(function(options){
         var client = utils.newFibosClient();
-        var res = client.getProducersSync({json: true});
+        var res = client.getProducersSync({json: true, limit: options.limit || 10});
         console.log(res);
     });
 
@@ -118,7 +119,7 @@ program
     });
 
 program
-    .command("regproducer <account> <producer-key> <url> [location]")
+    .command("regproducer <account> <producer-key> [url] [location]")
     .description("Register a new producer", {
         "account": "TEXT      The account to register as a producer (required)",
         "producer-key": "TEXT      The producer's public key (required)",
@@ -129,7 +130,7 @@ program
         location = location || 0;
         var client = utils.newFibosClient();
         var ctx = client.contractSync("eosio");
-        var res = ctx.regproducerSync(account, producerKey, url, location);
+        var res = ctx.regproducerSync(account, producerKey, url || "", location);
         console.log(res);
     });
 
@@ -155,7 +156,7 @@ program
     .action(function(voter, producers, options) {
         var client = utils.newFibosClient();
         var ctx = client.contractSync("eosio");
-        var res = ctx.voteproducerSync(voter, options.proxy || "", producers);
+        var res = ctx.voteproducerSync(voter, options.proxy || "", producers.sort());
         console.log(res);
     });
 

@@ -12,7 +12,7 @@ program
         }
         var client = utils.newFibosClient();
         var ctx = client.contractSync("eosio.token");
-        var res = ctx.transferSync(sender, recipient, amount, memo);
+        var res = ctx.transferSync(sender, recipient, amount, utils.isOptionalArgSet(memo) ? memo : "");
         console.log(res);
     })
     .helpInfo(`

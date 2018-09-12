@@ -24,7 +24,7 @@ exports.newFibosClient = function(config) {
     return newClient({
         chainId: config.chainId || process.env.FIBOS_CHAINID || "6aa7bd33b6b45192465afa3553dedb531acaaff8928cf64b70bd4c5e49b7ec6a",
         keyProvider: config.keyProvider || process.env.FIBOS_PRIKEY,
-        httpEndpoint: config.httpEndpoint || process.env.FIBOS_URL || "http://se-rpc.fibos.io:8870",
+        httpEndpoint: config.httpEndpoint || process.env.FIBOS_URL || "http://sl-rpc.fibos.io:8870",
         verbose: config.verbose || process.env.FIBOS_VERBOSE || false
     });
 };
@@ -43,4 +43,8 @@ exports.checkArgs = function(program) {
     if (!process.argv.slice(2).length) {
       program.outputHelp();
     }
+}
+
+exports.isOptionalArgSet = function(arg) {
+    return typeof arg == "string"
 }

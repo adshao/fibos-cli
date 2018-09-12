@@ -156,7 +156,7 @@ program
     .action(function(voter, producers, options) {
         var client = utils.newFibosClient();
         var ctx = client.contractSync("eosio");
-        var res = ctx.voteproducerSync(voter, options.proxy || "", producers.sort());
+        var res = ctx.voteproducerSync(voter, options.proxy || "", typeof producers == "undefined" ? [] : producers.sort());
         console.log(res);
     });
 

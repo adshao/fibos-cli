@@ -21,9 +21,22 @@ program
         "scope": "TEXT    The scope within the contract in which the table is found (required)",
         "table": "TEXT    The name of the table as specified by the contract abi (required)"
     })
-    .action(function(contract, scope, table) {
+    .option("-l,--limit <UINT>", "The maximum number of rows to return")
+    .option("-L,--lower <TEXT>", "JSON representation of lower bound value of key, defaults to first")
+    .option("-U,--upper <TEXT>", "JSON representation of upper bound value value of key, defaults to last")
+    .action(function(contract, scope, table, options) {
         var client = utils.newFibosClient();
-        console.log(client.getTableRowsSync(true, contract, scope, table));
+        var o = {json: true, code: contract, scope: scope, table: table};
+        if (options.limit) {
+            o["limit"] = options.limit
+        }
+        if (options.lower) {
+            o["lower_bound"] = options.lower
+        }
+        if (options.upper) {
+            o["upper_bound"] = options.upper
+        }
+        console.log(client.getTableRowsSync(o));
     });
 
 program
